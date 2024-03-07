@@ -3,6 +3,7 @@ package com.springkotlin.springsplit.entities
 import jakarta.persistence.*
 import org.antlr.v4.runtime.misc.IntegerList
 import org.hibernate.annotations.CreationTimestamp
+import org.jetbrains.annotations.NotNull
 import org.springframework.data.annotation.CreatedDate
 import java.time.LocalDateTime
 
@@ -16,30 +17,26 @@ data class User(
         val id:Int,
 
         @Column(name="name")
-        val name:String,
+        var name:String,
 
         @Column(name="email")
-        val email:String,
+        var email:String,
 
         @Column(name="password")
-        val password:String,
-
-        @ManyToMany
-        @Column(name="group")
-        val group_envolved:List<Int>,
-
-        @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
-        @JoinTable(
-                name = "user_group",
-                joinColumns = [JoinColumn(name = "user_id", referencedColumnName = "id")],
-                inverseJoinColumns = [JoinColumn(name = "group_id", referencedColumnName = "id")]
-        )
-        var groupIn: MutableSet<Group> = mutableSetOf(),
+        var password:String,
 
 
-        @CreationTimestamp
+        @ManyToMany(mappedBy = "users", cascade = [CascadeType.ALL])
+        var troops: Set<Troop> = HashSet<Troop>(),
+
+
+
+        @CreationTimestamp @NotNull
         val createdAt:LocalDateTime = LocalDateTime.now()
 
 
 
-)
+){
+        constructor(name:String,email:String,password:String) : this(0,name,email,password)
+}
+

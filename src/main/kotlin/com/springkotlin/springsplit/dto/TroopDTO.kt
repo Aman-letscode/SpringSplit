@@ -2,8 +2,8 @@ package com.springkotlin.springsplit.dto
 
 import com.springkotlin.springsplit.entities.User
 
-data class GroupDTO(
+data class TroopDTO(
         val name:String,
-        val createdBy: User,
-        val user_list:List<Int>,
+        val createdBy: String,
+        val user_list:List<String>,
 )

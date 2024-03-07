@@ -28,8 +28,8 @@ data class Payment(
         val receiver:User,
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name="groupId")
-        val groupId:Group,
+        @JoinColumn(name="troopId")
+        val troop: Troop,
 
         @CreationTimestamp
         val createdAt: LocalDateTime = LocalDateTime.now()

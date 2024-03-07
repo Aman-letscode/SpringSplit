@@ -1,9 +1,9 @@
 package com.springkotlin.springsplit.dto
 
-data class CreateExpense (
+data class ExpenseDTO (
         val amount:Int,
         val userId:Int,
         val splitList:List<Int>,
-        val groupId:Int
+        val troopId:Int
 
 )
