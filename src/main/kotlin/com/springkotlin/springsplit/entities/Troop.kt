@@ -2,6 +2,7 @@ package com.springkotlin.springsplit.entities
 
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 import org.hibernate.validator.constraints.UniqueElements
 import java.time.LocalDateTime
 
@@ -14,30 +15,31 @@ data class Troop(
     val id:Int,
 
     @UniqueElements
-    @Column(name="name")
+    @Column(name="name",unique = true)
     val name:String,
 
 
-//        @ManyToMany(mappedBy = "groups",fetch = FetchType.LAZY)
-//        val userEnvolved:Set<User>,
-
-
-
-    @ManyToMany(cascade = arrayOf(CascadeType.ALL))
+    @ManyToMany( cascade = arrayOf(CascadeType.PERSIST), fetch = FetchType.EAGER)
     @JoinTable(
-        name = "troop_user",
-        joinColumns = arrayOf(JoinColumn(name = "troop_id")),
-        inverseJoinColumns = arrayOf(JoinColumn(name = "user_id"))
+        name = "troop_user"
     )
-    var users: Set<User> = HashSet<User>(),
+    var users: MutableSet<User> = mutableSetOf(),
 
     @Column(name="totalAmountTransacted")
-    val totalAmount:Int,
+    val totalAmount:Float,
+
+    @OneToMany(mappedBy = "troop", fetch = FetchType.LAZY)
+    var troopPayments:Set<Payment> = HashSet<Payment>(),
+
 
     @CreationTimestamp
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    @Column(updatable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @UpdateTimestamp
+    val updatedAt: LocalDateTime = LocalDateTime.now()
 
 
 ){
-    constructor(name:String,users:Set<User>,totalAmount: Int):this(0,name,users,totalAmount)
+    constructor(name:String,users:MutableSet<User>,totalAmount: Float):this(0,name,users,totalAmount)
 }

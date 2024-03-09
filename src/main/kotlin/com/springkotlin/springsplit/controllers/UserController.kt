@@ -1,7 +1,9 @@
 package com.springkotlin.springsplit.controllers
 
+import com.springkotlin.springsplit.dto.ExpenseDetails
 import com.springkotlin.springsplit.dto.Login
-import com.springkotlin.springsplit.dto.UserInfo
+import com.springkotlin.springsplit.dto.UserDTO
+import com.springkotlin.springsplit.entities.User
 import com.springkotlin.springsplit.services.implement.UserServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,8 +38,13 @@ class UserController{
 
 
     @PostMapping("/register")
-    fun createUser(@RequestBody userInfo: UserInfo):UserInfo{
-        return userService.createUser(userInfo)
+    fun createUser(@RequestBody userDTO: UserDTO):UserDTO{
+        return userService.createUser(userDTO)
 //        return result
     }
+
+    @GetMapping("/allusers")
+    fun addUsers():List<User> = userService.displayAllUser()
+    @GetMapping("/user")
+    fun expenseDetails(@RequestBody credentials:Login):ExpenseDetails = userService.expenseDetails(credentials)
 }

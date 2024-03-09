@@ -2,6 +2,7 @@ package com.springkotlin.springsplit.entities
 
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
 
 
@@ -15,24 +16,31 @@ data class Payment(
         val id:Int,
 
         @Column(name="amount")
-        val amount:Int,
+        val amount:Float,
 
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name="refunder")
+        @JoinColumn(name="refunderId")
         val refunder:User,
 
 
         @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name="reciever")
+        @JoinColumn(name="receiverId")
         val receiver:User,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name="troopId")
         val troop: Troop,
 
+        @Column(name = "status")
+        var status:String,
+
         @CreationTimestamp
-        val createdAt: LocalDateTime = LocalDateTime.now()
+        @Column(updatable = false)
+        val createdAt: LocalDateTime = LocalDateTime.now(),
 
-
-)
+        @UpdateTimestamp
+        val updatedAt: LocalDateTime = LocalDateTime.now()
+){
+        constructor(amount:Float,refunder: User,receiver: User,troop: Troop,status: String):this(0,amount,refunder,receiver,troop,status)
+}

@@ -1,10 +1,12 @@
 package com.springkotlin.springsplit.services
 
+import com.springkotlin.springsplit.dto.ExpenseDetails
 import com.springkotlin.springsplit.dto.Login
-import com.springkotlin.springsplit.dto.UserInfo
+import com.springkotlin.springsplit.dto.UserDTO
 
 interface UserService {
     fun login(credentials:Login):String
 
-    fun createUser(userInfo:UserInfo):UserInfo
+    fun createUser(userDTO:UserDTO):UserDTO
+    fun expenseDetails(credentials: Login):ExpenseDetails
 }
