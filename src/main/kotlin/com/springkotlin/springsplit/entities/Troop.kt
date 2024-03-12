@@ -19,10 +19,8 @@ data class Troop(
     val name:String,
 
 
-    @ManyToMany( cascade = arrayOf(CascadeType.PERSIST), fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "troop_user"
-    )
+    @ManyToMany( cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+    @JoinTable(name = "troop_user")
     var users: MutableSet<User> = mutableSetOf(),
 
     @Column(name="totalAmountTransacted")

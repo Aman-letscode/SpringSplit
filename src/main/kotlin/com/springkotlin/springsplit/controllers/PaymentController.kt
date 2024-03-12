@@ -1,11 +1,11 @@
 package com.springkotlin.springsplit.controllers
 
-import com.springkotlin.springsplit.dto.ExpenseDTO
-import com.springkotlin.springsplit.dto.PayDue
-import com.springkotlin.springsplit.dto.UserDTO
+import com.springkotlin.springsplit.dto.*
 import com.springkotlin.springsplit.entities.Payment
 import com.springkotlin.springsplit.services.implement.PaymentServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
@@ -18,18 +18,27 @@ class PaymentController(@Autowired var paymentServiceImpl: PaymentServiceImpl) {
     }
 
     @PostMapping("/createxpense")
-    fun createExpense(@RequestBody expenseDetails: ExpenseDTO):List<Payment>{
-        return paymentServiceImpl.createExpense(expenseDetails)
-    }
+    fun createExpense(@RequestBody expenseDetails: SplitDTO):ResponseEntity<Any> =
+         ResponseEntity.ok(paymentServiceImpl.createExpense(expenseDetails))
+
 
     @PostMapping("/user")
-    fun paymentsOfUser(@RequestBody user: UserDTO):List<Payment>{
-        return paymentServiceImpl.showExpense(user)
-    }
+    fun paymentsOfUser(@RequestBody user: UserDTO):ResponseEntity<Any> = ResponseEntity.ok(paymentServiceImpl.showExpense(user))
+
+
+
+    @GetMapping("/user")
+    fun expenseDetails(@RequestBody credentials: LoginDTO): ResponseEntity<ExpenseDetails> = ResponseEntity.ok(paymentServiceImpl.expenseDetails(credentials))
+
 
     @PutMapping("/paydue")
-    fun payDue(@RequestBody paydue: PayDue):Payment{
-        return paymentServiceImpl.payDue(paydue)
+    fun payDue(@RequestBody paydue: PayDue): ResponseEntity<Any> {
+        try {
+            val response = paymentServiceImpl.payDue(paydue)
+            return ResponseEntity.ok(response)
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing payment")
+        }
     }
 
 

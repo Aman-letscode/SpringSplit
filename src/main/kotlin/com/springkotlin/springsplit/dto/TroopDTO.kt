@@ -4,6 +4,7 @@ import com.springkotlin.springsplit.entities.User
 
 data class TroopDTO(
         val name:String,
-        val user_list:MutableSet<User>,
-        val totalAmountTransacted : Float
+//        val userList: Set<UserEmailDTO>,
+        val userList: MutableSet<User>,
+        val totalAmountTransacted: Float
 )

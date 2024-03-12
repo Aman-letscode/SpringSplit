@@ -1,5 +1,6 @@
 package com.springkotlin.springsplit.entities
 
+import jakarta.annotation.Nullable
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -19,16 +20,19 @@ data class Payment(
         val amount:Float,
 
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @Nullable
+        @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         @JoinColumn(name="refunderId")
         val refunder:User,
 
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @Nullable
+        @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         @JoinColumn(name="receiverId")
         val receiver:User,
 
-        @ManyToOne(fetch = FetchType.LAZY)
+        @Nullable
+        @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         @JoinColumn(name="troopId")
         val troop: Troop,
 

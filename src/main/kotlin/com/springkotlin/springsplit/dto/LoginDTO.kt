@@ -1,6 +1,6 @@
 package com.springkotlin.springsplit.dto
 
-data class Login(
+data class LoginDTO(
         val email:String,
         val password:String
 )

@@ -1,69 +1,62 @@
 package com.springkotlin.springsplit.services.implement
 
-import com.springkotlin.springsplit.dto.ExpenseDetails
-import com.springkotlin.springsplit.dto.Login
+import com.springkotlin.springsplit.config.JWTGenerator
+import com.springkotlin.springsplit.dto.AuthTokenDTO
+import com.springkotlin.springsplit.dto.LoginDTO
 import com.springkotlin.springsplit.dto.UserDTO
-import com.springkotlin.springsplit.entities.Payment
+import com.springkotlin.springsplit.dto.UserToUserEmailDTO
+import com.springkotlin.springsplit.entities.Roles
 import com.springkotlin.springsplit.entities.User
+import com.springkotlin.springsplit.repositories.RoleRepository
 import com.springkotlin.springsplit.repositories.UserRepository
 import com.springkotlin.springsplit.services.UserService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 
-@Suppress("UNREACHABLE_CODE")
+
 @Service
-class UserServiceImpl(@Autowired var userRepository: UserRepository) :UserService{
+class UserServiceImpl :UserService{
 
+    @Autowired lateinit var userRepository: UserRepository
+    @Autowired lateinit var roleRepository: RoleRepository
+    @Autowired lateinit var passwordEncoder: BCryptPasswordEncoder;
 
-    override fun login(credentials: Login): String {
+    //For Login
+    @Autowired lateinit var authenticationManager:AuthenticationManager
+    @Autowired lateinit var jwtGenerator: JWTGenerator
 
-
-        var result : User? =  userRepository.findByEmail(credentials.email)
-        if(result==null)return "User Not found"
-
-        result =  userRepository.findByEmailAndPassword(credentials.email,credentials.password)
-        if(result!=null){
-            return "Login Successfully"
-        }
-        else{
-            return "User Not found"
-        }
-
-
+    override fun login(credentials: LoginDTO): Any {
+//        val authentication: Authentication = authenticationManager.authenticate(
+//            UsernamePasswordAuthenticationToken(
+//                credentials.email,
+//                credentials.password
+//            )
+//        )
+//        SecurityContextHolder.getContext().authentication = authentication
+        val token = jwtGenerator.generateToken(credentials.email)
+        val foundUser:User = userRepository.findByEmail(credentials.email)?:return NotFoundException()
+        if (passwordEncoder.matches(credentials.password,foundUser.password)) return AuthTokenDTO(token)
+        else return "Invalid Password"
     }
 
-    override fun createUser(userDTO: UserDTO):UserDTO {
+    override fun createUser(userDTO: UserDTO):Any {
 
-        val user = User(userDTO.name,userDTO.email,userDTO.password)
+        val foundUser:User? = userRepository.findByEmail(userDTO.email)
+        if(foundUser!=null) return "User Already Exists"
+
+        val role: Roles = roleRepository.findByName(userDTO.role)!!
+        val encodedPassword:String = passwordEncoder.encode(userDTO.password)
+        val user = User(userDTO.name,userDTO.email,encodedPassword,role)
         var result:User = userRepository.save(user)
-        return UserDTO(result.name,result.email,result.password)
+        return UserDTO(result.name,result.email,result.password,result.role.name)
     }
     fun displayAllUser():List<User> = userRepository.findAll()
-
-    override fun expenseDetails(credentials: Login): ExpenseDetails {
-        val user:User = userRepository.findByEmail(credentials.email)
-        var totalAmountPaid:Float = 0F
-        var totalAmountDue:Float = 0F
-        var totalAmountRecieve:Float = 0F
-        var totalAmountLeft:Float = 0F
-
-        var paymentList: List<Payment> = user.refunderPayments.filter{it.status=="paid"}
-        totalAmountPaid = paymentList.sumOf { it.amount.toDouble() }.toFloat()
-
-        paymentList = user.refunderPayments.filter{it.status=="unpaid"}
-        totalAmountDue = paymentList.sumOf { it.amount.toDouble() }.toFloat()
-
-
-        paymentList = user.receiverPayments.filter{it.status=="paid"}
-        totalAmountRecieve = paymentList.sumOf { it.amount.toDouble() }.toFloat()
-
-        paymentList = user.receiverPayments.filter{it.status=="unpaid"}
-        totalAmountRecieve = paymentList.sumOf { it.amount.toDouble() }.toFloat()
-
-
-        val result:ExpenseDetails = ExpenseDetails(credentials.email,totalAmountPaid,totalAmountDue,totalAmountRecieve)
-        return result
-    }
 
 
 

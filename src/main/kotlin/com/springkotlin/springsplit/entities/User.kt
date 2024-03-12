@@ -1,10 +1,9 @@
 package com.springkotlin.springsplit.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
-import org.antlr.v4.runtime.misc.IntegerList
 import org.hibernate.annotations.CreationTimestamp
 import org.jetbrains.annotations.NotNull
-import org.springframework.data.annotation.CreatedDate
 import java.time.LocalDateTime
 
 
@@ -22,19 +21,24 @@ data class User(
         @Column(name="email",unique = true)
         var email:String,
 
+        @JsonIgnore
         @Column(name="password")
         var password:String,
 
+        @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
+        @JoinColumn(name="roles")
+        val role: Roles,
 
-        @ManyToMany(mappedBy = "users",cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        @ManyToMany(mappedBy = "users",cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
         var troops: MutableSet<Troop> = mutableSetOf(),
 
 
-        @OneToMany(mappedBy = "refunder", fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "refunder", fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         var refunderPayments:Set<Payment> = HashSet<Payment>(),
 
-        @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+        @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         var receiverPayments:Set<Payment> = HashSet<Payment>(),
+
 
 
         @CreationTimestamp @NotNull
@@ -43,6 +47,6 @@ data class User(
 
 
 ){
-        constructor(name:String,email:String,password:String) : this(0,name,email,password)
+        constructor(name:String,email:String,password:String,role:Roles) : this(0,name,email,password,role)
 }
 

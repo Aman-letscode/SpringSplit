@@ -2,15 +2,13 @@ package com.springkotlin.springsplit.controllers
 
 import com.springkotlin.springsplit.dto.AddUserDTO
 import com.springkotlin.springsplit.dto.TroopDTO
+import com.springkotlin.springsplit.dto.TroopDetailsDTO
+import com.springkotlin.springsplit.dto.UserEmailDTO
 import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.services.implement.TroopServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 
 
 @RestController
@@ -22,26 +20,15 @@ class TroopController(@Autowired var troopServiceImpl: TroopServiceImpl) {
         return "Welcome to creation of Troops"
     }
     @GetMapping("/showTroops")
-    fun showTroops():List<TroopDTO>{
-
-        return troopServiceImpl.allTroops()
-    }
+    fun showTroops():ResponseEntity<Any>   = ResponseEntity.ok(troopServiceImpl.allTroops())
 
     @PostMapping("/createTroop")
-    fun createTroop(@RequestBody troopData:AddUserDTO):String{
-        return troopServiceImpl.createTroop(troopData)
-    }
+    fun createTroop(@RequestBody troopData:AddUserDTO):String = troopServiceImpl.createTroop(troopData)
 
+    @PutMapping("/addUsers")
+    fun addUsers(@RequestBody addUser:AddUserDTO):String = troopServiceImpl.addUserInTroop(addUser.emailList,addUser.troopName)
 
-    @PostMapping("/addUsers")
-    fun addUsers(@RequestBody addUser:AddUserDTO):String{
-        return troopServiceImpl.addUserInTroop(addUser.emailList,addUser.troopName)
-    }
-
-
-    @GetMapping("/user/{id}")
-    fun troopsOfUser(@PathVariable("id") userId:Int):List<TroopDTO>{
-        return troopServiceImpl.allTroopsofUser(userId)
-    }
+    @GetMapping("/user")
+    fun troopsOfUser(@RequestBody userEmailDTO: UserEmailDTO):List<Any>  = troopServiceImpl.allTroopsofUser(userEmailDTO)
 
 }

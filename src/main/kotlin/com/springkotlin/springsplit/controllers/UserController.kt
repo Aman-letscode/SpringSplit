@@ -1,11 +1,12 @@
 package com.springkotlin.springsplit.controllers
 
 import com.springkotlin.springsplit.dto.ExpenseDetails
-import com.springkotlin.springsplit.dto.Login
+import com.springkotlin.springsplit.dto.LoginDTO
 import com.springkotlin.springsplit.dto.UserDTO
 import com.springkotlin.springsplit.entities.User
 import com.springkotlin.springsplit.services.implement.UserServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/auth")
 class UserController{
 
     @Autowired
@@ -22,29 +23,24 @@ class UserController{
 
 
     @GetMapping("/register")
-    fun register():String{
-        return "Welcome to Re"
-    }
+    fun register():String = "Welcome to Re"
+
     @GetMapping("/login")
-    fun login():String{
-        return "Welcome to Login Portal"
-    }
+    fun login():String = "Welcome to Login Portal"
+
 
     @PostMapping("/login")
-    fun checkUser(@RequestBody userCredentials: Login):String{
-        return userService.login(userCredentials)
-//        return "Welcome to Login Portal"
-    }
+    fun checkUser(@RequestBody userCredentials: LoginDTO):ResponseEntity<Any> = ResponseEntity.ok(userService.login(userCredentials))
+
+
 
 
     @PostMapping("/register")
-    fun createUser(@RequestBody userDTO: UserDTO):UserDTO{
-        return userService.createUser(userDTO)
-//        return result
-    }
+    fun createUser(@RequestBody userDTO: UserDTO):ResponseEntity<Any> = ResponseEntity.ok(userService.createUser(userDTO))
+
+
 
     @GetMapping("/allusers")
-    fun addUsers():List<User> = userService.displayAllUser()
-    @GetMapping("/user")
-    fun expenseDetails(@RequestBody credentials:Login):ExpenseDetails = userService.expenseDetails(credentials)
+    fun addUsers():ResponseEntity<List<User>> = ResponseEntity.ok(userService.displayAllUser())
+
 }

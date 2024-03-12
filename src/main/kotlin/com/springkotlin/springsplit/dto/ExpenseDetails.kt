@@ -5,6 +5,7 @@ data class ExpenseDetails(
     val totalAmountPaid:Float,
     val totalAmountDue:Float,
     val totalAmountRecieved:Float,
+    val totalAmountLeft:Float
 
 
 )
