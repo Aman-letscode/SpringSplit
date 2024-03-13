@@ -21,6 +21,9 @@ class TroopController(@Autowired var troopServiceImpl: TroopServiceImpl) {
     }
     @GetMapping("/showTroops")
     fun showTroops():ResponseEntity<Any>   = ResponseEntity.ok(troopServiceImpl.allTroops())
+//
+//    @GetMapping("/showTroops")
+//    fun showTroops():ResponseEntity<Any>   = ResponseEntity.ok(troopServiceImpl.allTroopsBySpec())
 
     @PostMapping("/createTroop")
     fun createTroop(@RequestBody troopData:AddUserDTO,@RequestHeader("Authorization") token: String):String = troopServiceImpl.createTroop(troopData,token)

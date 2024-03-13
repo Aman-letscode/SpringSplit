@@ -45,7 +45,6 @@ data class Payment(
 
 
         @CreationTimestamp
-
         @Column(updatable = false)
         val createdAt: LocalDateTime? = LocalDateTime.now(),
 

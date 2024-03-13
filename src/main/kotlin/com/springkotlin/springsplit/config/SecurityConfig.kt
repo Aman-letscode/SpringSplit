@@ -1,6 +1,7 @@
 package com.springkotlin.springsplit.config
 
 import com.jobapplication.example.jobapplication.security.JWTAuthenticationFilter
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -99,6 +100,7 @@ class SecurityConfig{
     ): AuthenticationManager {
         return authenticationConfiguration.getAuthenticationManager()
     }
+
 
 
 

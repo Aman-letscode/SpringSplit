@@ -41,6 +41,6 @@ class UserController{
 
 
     @GetMapping("/allusers")
-    fun addUsers():ResponseEntity<List<User>> = ResponseEntity.ok(userService.displayAllUser())
+    fun addUsers():ResponseEntity<List<UserDTO>> = ResponseEntity.ok(userService.displayAllUser())
 
 }

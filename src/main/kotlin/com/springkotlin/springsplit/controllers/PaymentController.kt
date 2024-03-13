@@ -23,7 +23,7 @@ class PaymentController(@Autowired var paymentServiceImpl: PaymentServiceImpl) {
 
 
     @GetMapping("/user")
-    fun paymentsOfUser(@RequestHeader("Authorization") token: String):ResponseEntity<Any> = ResponseEntity.ok(paymentServiceImpl.paymentsOfUser(token))
+    fun paymentsOfUser(@RequestHeader("Authorization") token: String,@RequestBody userAs: UserAs):ResponseEntity<Any> = ResponseEntity.ok(paymentServiceImpl.paymentsOfUser(userAs,token))
 
     @GetMapping("/{Id}")
     fun paymentDetailsOfSplitId(@PathVariable("Id") splitId:String,@RequestHeader("Authorization") token:String):ResponseEntity<SplitStatus> = ResponseEntity.ok(paymentServiceImpl.splitStatus(splitId,token))
@@ -47,6 +47,8 @@ class PaymentController(@Autowired var paymentServiceImpl: PaymentServiceImpl) {
 
     @DeleteMapping("/deleteSplit/{splitId}")
     fun deleteSplitPayment(@PathVariable("splitId") splitId: String,@RequestHeader("Authorization") token:String):Any = paymentServiceImpl.deleteTheSplit(splitId,token)
+
+
 
 
 
