@@ -1,9 +1,9 @@
 package com.springkotlin.springsplit.services.implement
 
+import com.springkotlin.springsplit.config.JWTGenerator
 import com.springkotlin.springsplit.dto.*
 import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.entities.User
-import com.springkotlin.springsplit.repositories.Impl.TroopRepositoryImp
 import com.springkotlin.springsplit.repositories.PaymentRepository
 import com.springkotlin.springsplit.repositories.TroopRepository
 import com.springkotlin.springsplit.repositories.UserRepository
@@ -12,7 +12,6 @@ import com.springkotlin.springsplit.services.TroopService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.stereotype.Service
-import java.util.DuplicateFormatFlagsException
 
 @Service
 class TroopServiceImpl
@@ -22,39 +21,35 @@ class TroopServiceImpl
 
         @Autowired lateinit var paymentRepository: PaymentRepository;
 
-    @Autowired lateinit var troopRepositoryImp: TroopRepositoryImp
+    val jwtGenerator:JWTGenerator = JWTGenerator()
 
 
-    override fun createTroop(troopInfo: AddUserDTO): String {
+
+    override fun createTroop(troopInfo: AddUserDTO,token:String): String {
+        val user:User = extractUserFromToken(token)
         val userList= mutableSetOf<User>()
+        val userNotFound = mutableSetOf<String>()
+        userList.add(user)
         for (userEmail in troopInfo.emailList) {
             var troopMember: User? = userRepository.findByEmail(userEmail)
-
-            println(troopMember)
-            if(troopMember==null) return userEmail+" Not Found "
-            userList.add(troopMember!!)
+            if(troopMember==null)userNotFound.add(userEmail)
+            else userList.add(troopMember)
         }
+        if(userNotFound.isNotEmpty()) return userNotFound.toString()
         if(userList.isEmpty()) {
             return "No user added in troop"
         }
-
         var troop: Troop = Troop(name=troopInfo.troopName, users = userList, (0).toFloat())
         if(troop.users.isEmpty()) return "User not added"
         var result: Troop = troopRepository.save(troop)
-
         return result.toString()
     }
 
-    override fun allTroopsofUser(userEmailDTO: UserEmailDTO): List<Any> {
+    override fun allTroopsofUser(userEmailDTO: UserEmailDTO, token: String): List<Any> =
+                 allTroops().filter { it -> it.userList.contains(UserToUserEmailDTO(extractUserFromToken(token))) }
 
-        val userDetails:User = userRepository.findByEmail(userEmailDTO.email)?:return arrayListOf("User Not Found")
-        val troopList:List<TroopDetailsDTO> = allTroops().filter { it -> it.userList.contains(UserToUserEmailDTO(userDetails)) }
-
-        return troopList
-    }
 
     override fun allTroops():List<TroopDetailsDTO> {
-//    override fun allTroops():List<TroopDetailsDTO> {
         val result = troopRepository.findTroops()
         val troopDetailsMap = mutableMapOf<Int, TroopDetailsDTO>()
 
@@ -77,33 +72,29 @@ class TroopServiceImpl
     }
 
 
+    override fun addUserInTroop(addUserDTO: AddUserDTO,token:String): String {
 
-//    fun findByCriteria():List<Troop> = troopRepositoryImp.findAllByTroops()
 
-    override fun addUserInTroop(members: List<String>, troopName: String): String {
-
-        var user_list= mutableSetOf<User>()
-        var troop: Troop
-
+        val troop: Troop
         try{
-
-       troop = troopRepository.findByName(troopName)?:return "Troop Not found"
-}catch (e:EmptyResultDataAccessException){
+       troop = troopRepository.findByName(addUserDTO.troopName)
+    }catch (e:EmptyResultDataAccessException){
     return "Troop Not Found"
 }
+        if(!troopRepository.existsByNameAndUsers(addUserDTO.troopName,extractUserFromToken(token))) return "User Not Part of the troop"
+        val troopDetails:TroopDetailsDTO = allTroops().filter { it.name==addUserDTO.troopName }.get(0)
 
 
-        val troopDetails:TroopDetailsDTO = allTroops().filter { it.name==troopName }.get(0)
-        var memberUser: List<User> = members.mapNotNull { userRepository.findByEmail(it) }
-println(memberUser)
-        if(memberUser.isEmpty()) return members.joinToString(", ") { "$it: No user found" }
+        var memberUser: List<User> = addUserDTO.emailList.mapNotNull { userRepository.findByEmail(it) }
+        //user Not found
+        if(memberUser.isEmpty()) return addUserDTO.emailList.joinToString(", ") { "$it: No user found" }
         val membersNotFound = memberUser.filterNot { userEmail -> memberUser.any{it.email==userEmail.email} }
         if (membersNotFound.isNotEmpty()) {
                 return membersNotFound.joinToString(", ") { "$it: No user found" }
         }
+
+
         memberUser = memberUser.filter { UserToUserEmailDTO(it) !in troopDetails.userList }
-
-
         val updatedMembers: MutableSet<User> = troop.users.plus(memberUser).toMutableSet()
 
         val updatedTroop: Troop = troop.copy(users = updatedMembers)
@@ -117,13 +108,9 @@ println(memberUser)
         }
     }
 
-    override fun allPaymentsOfTroop(troopName: String): List<PaymentDTO> {
-        TODO("Not yet implemented")
-    }
 
-    override fun allUnpaidPaymentsofTroops(troop: TroopDTO): List<PaymentDTO> {
-        TODO("Not yet implemented")
-    }
+
+    private fun extractUserFromToken(token:String):User =userRepository.findByEmail(jwtGenerator.generateUserNameByJWT(token.substring(7, token.length)))!!
 
 
 

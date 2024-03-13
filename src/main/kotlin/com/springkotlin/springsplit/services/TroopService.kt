@@ -6,16 +6,16 @@ import com.springkotlin.springsplit.entities.User
 
 interface TroopService {
 
-    fun createTroop(troopInfo:AddUserDTO):String
+    fun createTroop(troopInfo:AddUserDTO,token:String):String
 
-    fun allTroopsofUser(userEmailDTO: UserEmailDTO):List<Any>
+    fun allTroopsofUser(userEmailDTO: UserEmailDTO,token: String):List<Any>
     fun allTroops():List<Any>
 //    fun allTroops():List<TroopDetailsDTO>
 
-    fun addUserInTroop(members: List<String>, troopName: String):String
+    fun addUserInTroop(addUserDTO: AddUserDTO,token: String):String
 
-    fun allPaymentsOfTroop(troopName:String):List<PaymentDTO>
-
-    fun allUnpaidPaymentsofTroops(troop:TroopDTO):List<PaymentDTO>
+//    fun allPaymentsOfTroop(troopName:String):List<PaymentDTO>
+//
+//    fun allUnpaidPaymentsofTroops(troop:TroopDTO):List<PaymentDTO>
 
 }

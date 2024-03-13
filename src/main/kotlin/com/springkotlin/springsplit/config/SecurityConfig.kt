@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -41,23 +42,25 @@ class SecurityConfig{
             cors{}
             csrf { disable() }
             exceptionHandling { authenticationEntryPoint = authEntryPoint }
-
+            sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
             authorizeRequests {
-                authorize("/api/auth/**",permitAll)
+                authorize("/api/auth/allUsers",hasAuthority("ADMIN"))
+                authorize("/api/auth/register",permitAll)
+                authorize("/api/auth/login",permitAll)
                 authorize("/api/troop/showTroops",hasAuthority("ADMIN"))
-                authorize("/api/troop/createTroop",permitAll)
-                authorize("/api/troop/addUsers",permitAll)
-                authorize("/api/troop/user",permitAll)
-                authorize("/api/payment/createxpense",permitAll)
-                authorize("/api/payment/user",permitAll)
-                authorize("/api/payment/paydue",permitAll)
-//                authorize(anyRequest,hasRole("ADMIN"))
+                authorize("/api/troop/createTroop",hasAuthority("USER"))
+                authorize("/api/troop/addUsers",hasAuthority("USER"))
+                authorize("/api/troop/user",hasAuthority("USER"))
+                authorize("/api/payment/createxpense",hasAuthority("USER"))
+                authorize("/api/payment/summary",hasAuthority("USER"))
+                authorize("/api/payment/paydue",hasAuthority("USER"))
+                authorize("/api/payment/{Id}",hasAuthority("USER"))
+                authorize("/api/payment/user",hasAuthority("USER"))
+                authorize("/api/payment/deleteSplit/{splitId}",hasAuthority("USER"))
                 authorize(anyRequest,authenticated)
 
             }
-//            httpBasic { defaults }
             addFilterBefore<UsernamePasswordAuthenticationFilter>(filter = jwtAuthenticationFilter())
-//            (JWTAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
 
 
         }

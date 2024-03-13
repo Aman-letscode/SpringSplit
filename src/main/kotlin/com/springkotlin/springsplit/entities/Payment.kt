@@ -16,35 +16,41 @@ data class Payment(
         @GeneratedValue(strategy = GenerationType.AUTO)
         val id:Int,
 
+
+        @Column(name = "splitId", nullable = true)
+        var splitId:String?,
+
         @Column(name="amount")
-        val amount:Float,
+        var amount:Float,
 
 
         @Nullable
         @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         @JoinColumn(name="refunderId")
-        val refunder:User,
+        var refunder:User?,
 
 
         @Nullable
         @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         @JoinColumn(name="receiverId")
-        val receiver:User,
+        var receiver:User?,
 
         @Nullable
         @ManyToOne(fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
         @JoinColumn(name="troopId")
-        val troop: Troop,
+        val troop: Troop?,
 
         @Column(name = "status")
-        var status:String,
+        var status:String?,
+
 
         @CreationTimestamp
+
         @Column(updatable = false)
-        val createdAt: LocalDateTime = LocalDateTime.now(),
+        val createdAt: LocalDateTime? = LocalDateTime.now(),
 
         @UpdateTimestamp
-        val updatedAt: LocalDateTime = LocalDateTime.now()
+        val updatedAt: LocalDateTime? = LocalDateTime.now()
 ){
-        constructor(amount:Float,refunder: User,receiver: User,troop: Troop,status: String):this(0,amount,refunder,receiver,troop,status)
+        constructor(splitId:String,amount:Float,refunder: User,receiver: User,troop: Troop,status: String):this(0,splitId,amount,refunder,receiver,troop,status)
 }

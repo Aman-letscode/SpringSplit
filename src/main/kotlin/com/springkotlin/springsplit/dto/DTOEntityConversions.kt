@@ -5,11 +5,12 @@ import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.entities.User
 
 fun PaymentToPaymentDTO(payment: Payment): PaymentDTO = PaymentDTO(
+    splitId = payment.splitId!!,
     amount = payment.amount,
-    refunder = UserToUserEmailDTO(payment.refunder),
-    receiver = UserToUserEmailDTO(payment.receiver),
-    troop = TroopToTroopDetailsDTO(payment.troop),
-    status = payment.status
+    refunder = UserToUserEmailDTO(payment.refunder!!),
+    receiver = UserToUserEmailDTO(payment.receiver!!),
+    troop = TroopToTroopDetailsDTO(payment.troop!!),
+    status = payment.status!!
 )
 
 fun TroopToTroopDetailsDTO(troop: Troop): TroopDetailsDTO =

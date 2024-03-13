@@ -3,8 +3,10 @@ package com.springkotlin.springsplit.config
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.WeakKeyException
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 import java.util.*
 import javax.crypto.SecretKey
 
@@ -59,4 +61,5 @@ return token
             .parseSignedClaims(token)
             .payload
     }
+
 }

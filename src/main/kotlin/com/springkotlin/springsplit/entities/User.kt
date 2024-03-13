@@ -5,6 +5,7 @@ import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
+import kotlin.jvm.Transient
 
 
 @Entity
@@ -30,19 +31,21 @@ data class User(
         val role: Roles,
 
         @ManyToMany(mappedBy = "users",cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-        var troops: MutableSet<Troop> = mutableSetOf(),
+        var troops: MutableSet<Troop>? = mutableSetOf(),
 
 
         @OneToMany(mappedBy = "refunder", fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
-        var refunderPayments:Set<Payment> = HashSet<Payment>(),
+        @Transient
+        var refunderPayments:Set<Payment>? = HashSet<Payment>(),
 
         @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY , cascade = [CascadeType.ALL])
-        var receiverPayments:Set<Payment> = HashSet<Payment>(),
+        @Transient
+        var receiverPayments:Set<Payment>? = HashSet<Payment>(),
 
 
 
         @CreationTimestamp @NotNull
-        val createdAt:LocalDateTime = LocalDateTime.now()
+        val createdAt:LocalDateTime? = LocalDateTime.now()
 
 
 

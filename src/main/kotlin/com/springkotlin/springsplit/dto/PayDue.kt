@@ -1,6 +1,6 @@
 package com.springkotlin.springsplit.dto
 
 data class PayDue(
-        val email:String,
-        val paymentId:Int
+        val splitId:String,
+        val amount:Float
 )

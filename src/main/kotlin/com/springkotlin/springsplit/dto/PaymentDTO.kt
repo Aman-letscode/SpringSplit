@@ -1,10 +1,9 @@
 package com.springkotlin.springsplit.dto
 
-import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.entities.User
-import javax.sound.midi.Receiver
 
 data class PaymentDTO(
+    val splitId:String,
     val amount:Float,
     val refunder: UserEmailDTO,
     val receiver: UserEmailDTO,

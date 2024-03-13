@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface RoleRepository:JpaRepository<Roles,Int> {
 
-    fun findByName(role:String):Roles?
+    fun findByName(role:String):Roles
 }

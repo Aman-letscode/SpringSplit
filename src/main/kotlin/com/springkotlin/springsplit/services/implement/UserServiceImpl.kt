@@ -50,7 +50,7 @@ class UserServiceImpl :UserService{
         val foundUser:User? = userRepository.findByEmail(userDTO.email)
         if(foundUser!=null) return "User Already Exists"
 
-        val role: Roles = roleRepository.findByName(userDTO.role)!!
+        val role: Roles = roleRepository.findByName(userDTO.role)
         val encodedPassword:String = passwordEncoder.encode(userDTO.password)
         val user = User(userDTO.name,userDTO.email,encodedPassword,role)
         var result:User = userRepository.save(user)

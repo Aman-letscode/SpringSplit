@@ -40,10 +40,13 @@ class JWTAuthenticationFilter : OncePerRequestFilter() {
         filterChain.doFilter(request, response)
     }
 
+
     private fun getJWTFromRequest(request: HttpServletRequest): String? {
         val bearerToken = request.getHeader("Authorization")
         return if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             bearerToken.substring(7, bearerToken.length)
         } else null
     }
+
+
 }

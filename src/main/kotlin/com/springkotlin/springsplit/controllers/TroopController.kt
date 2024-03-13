@@ -23,12 +23,12 @@ class TroopController(@Autowired var troopServiceImpl: TroopServiceImpl) {
     fun showTroops():ResponseEntity<Any>   = ResponseEntity.ok(troopServiceImpl.allTroops())
 
     @PostMapping("/createTroop")
-    fun createTroop(@RequestBody troopData:AddUserDTO):String = troopServiceImpl.createTroop(troopData)
+    fun createTroop(@RequestBody troopData:AddUserDTO,@RequestHeader("Authorization") token: String):String = troopServiceImpl.createTroop(troopData,token)
 
     @PutMapping("/addUsers")
-    fun addUsers(@RequestBody addUser:AddUserDTO):String = troopServiceImpl.addUserInTroop(addUser.emailList,addUser.troopName)
+    fun addUsers(@RequestBody addUser:AddUserDTO,@RequestHeader("Authorization") token: String):String = troopServiceImpl.addUserInTroop(addUser,token)
 
     @GetMapping("/user")
-    fun troopsOfUser(@RequestBody userEmailDTO: UserEmailDTO):List<Any>  = troopServiceImpl.allTroopsofUser(userEmailDTO)
+    fun troopsOfUser(@RequestBody userEmailDTO: UserEmailDTO,@RequestHeader("Authorization") token: String):List<Any>  = troopServiceImpl.allTroopsofUser(userEmailDTO,token)
 
 }

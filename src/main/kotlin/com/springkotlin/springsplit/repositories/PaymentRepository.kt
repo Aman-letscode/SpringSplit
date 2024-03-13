@@ -9,4 +9,9 @@ interface PaymentRepository:JpaRepository<Payment,Int> {
     fun findByRefunder(refunder: User):List<Payment>
     fun findByReceiver(receiver:User):List<Payment>
     fun findByTroop(troop: Troop):List<Payment>
+    fun existsBySplitId(splitId:String?):Boolean
+    fun findBySplitId(splitId: String): List<Payment>
+    fun findBySplitIdAndRefunder(splitId: String,refunder: User):List<Payment>
+
+
 }
