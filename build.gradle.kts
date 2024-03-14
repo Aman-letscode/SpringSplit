@@ -31,6 +31,8 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
 	implementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
 
+	implementation("org.springframework.boot:spring-boot-starter-mail:3.2.3")
+
 	implementation("javax.persistence:javax.persistence-api:2.2")
 	runtimeOnly("com.mysql:mysql-connector-j")
 //	runtimeOnly("com.h2database:h2")

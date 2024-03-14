@@ -13,5 +13,5 @@ interface PaymentRepository:JpaRepository<Payment,Int> {
     fun findBySplitId(splitId: String): List<Payment>
     fun findBySplitIdAndRefunder(splitId: String,refunder: User):List<Payment>
 
-
+    fun findBySplitIdAndReceiver(splitId: String,receiver: User):List<Payment>
 }

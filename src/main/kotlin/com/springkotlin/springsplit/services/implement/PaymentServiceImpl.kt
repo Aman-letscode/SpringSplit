@@ -1,7 +1,9 @@
 package com.springkotlin.springsplit.services.implement
 
-import com.springkotlin.springsplit.config.JWTGenerator
+
 import com.springkotlin.springsplit.dto.*
+import com.springkotlin.springsplit.email.EmailDetails
+import com.springkotlin.springsplit.email.EmailServiceImpl
 import com.springkotlin.springsplit.entities.Payment
 import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.entities.User
@@ -26,22 +28,23 @@ class PaymentServiceImpl : PaymentService {
     @Autowired
     lateinit var troopRepository: TroopRepository
 
-    val jwtGenerator:JWTGenerator = JWTGenerator()
+    @Autowired
+    lateinit var emailServiceImpl: EmailServiceImpl
 
-    override fun createExpense(splitDTO: SplitDTO,token: String): String {
+
+    override fun createExpense(splitDTO: SplitDTO,username:String): String {
         if(splitDTO.amount<=0) return "Amount cannot be less than or equal to 0"
-        val userEmail = extractEmailFromToken(token)
-        val user:User = userRepository.findByEmail(userEmail)!!
-        var refunderList: List<String> = splitDTO.splitList.filter { it!=userEmail }
+        val user:User = userRepository.findByEmail(username)!!
+        var refunderList: List<String> = splitDTO.splitList.filter { it!=username }
         if(splitDTO.troopName == "") return "Enter User Troop Name"
-        if(!troopRepository.existsByNameAndUsers(splitDTO.troopName,user)) return userEmail + " is not part of the Troop: "+ splitDTO.troopName
+        if(!troopRepository.existsByNameAndUsers(splitDTO.troopName,user)) return username + " is not part of the Troop: "+ splitDTO.troopName
         if (refunderList.isEmpty()) {
-            refunderList = troopRepository.findByName(splitDTO.troopName).users.toList().map { it.email }.filter { it != userEmail }
+            refunderList = troopRepository.findByName(splitDTO.troopName).users.toList().map { it.email }.filter { it != username }
         }
         val splitAmount = ((splitDTO.amount).toFloat() / (refunderList.size + 1))
         val amountPerMember = splitAmount.toBigDecimal().setScale(2, RoundingMode.CEILING).toFloat()
 
-        val receiver: User = userRepository.findByEmail(userEmail)?: return "UserEmail Does not exist"
+        val receiver: User = userRepository.findByEmail(username)?: return "UserEmail Does not exist"
         val troop: Troop? = if(splitDTO.troopName == "") null else troopRepository.findByName(splitDTO.troopName)
 
         val paymentList = mutableListOf<PaymentDTO>()
@@ -70,21 +73,22 @@ class PaymentServiceImpl : PaymentService {
         return paymentList.toString()
     }
 
-    override fun paymentsOfUser(userAs: UserAs,token: String): List<PaymentDTO> {
-        val userData: User = userRepository.findByEmail(extractEmailFromToken(token))!!
-        if(userAs.type == "refunder") return paymentRepository.findByRefunder(userData).map { PaymentToPaymentDTO(it) }
-        else if (userAs.type == "receiver") return paymentRepository.findByReceiver(userData).map { PaymentToPaymentDTO(it) }
-        else{
-            val paymentAsRefunder = paymentRepository.findByRefunder(userData).map { PaymentToPaymentDTO(it) }
-            val paymentAsReceiver = paymentRepository.findByReceiver(userData).map { PaymentToPaymentDTO(it) }
-            return (paymentAsRefunder + paymentAsReceiver)
+    override fun paymentsOfUser(userAs: UserAs,username:String): List<PaymentDTO> {
+        val userData: User = userRepository.findByEmail(username)!!
+        return when (userAs.type) {
+            "refunder" -> paymentRepository.findByRefunder(userData).map { PaymentToPaymentDTO(it) }
+            "receiver" -> paymentRepository.findByReceiver(userData).map { PaymentToPaymentDTO(it) }
+            else -> {
+                val paymentAsRefunder = paymentRepository.findByRefunder(userData).map { PaymentToPaymentDTO(it) }
+                val paymentAsReceiver = paymentRepository.findByReceiver(userData).map { PaymentToPaymentDTO(it) }
+                (paymentAsRefunder + paymentAsReceiver)
+            }
         }
     }
 
-    override fun payDue(payDue: PayDue,token:String): PaymentDTO {
-        val userEmail = extractEmailFromToken(token)
-        val user:User = userRepository.findByEmail(userEmail) ?: throw NotFoundException()
-        var paymentCard: Payment = paymentRepository.findBySplitIdAndRefunder(payDue.splitId,user).get(0)
+    override fun payDue(payDue: PayDue,username:String): PaymentDTO {
+        val user:User = userRepository.findByEmail(username) ?: throw NotFoundException()
+        val paymentCard: Payment = paymentRepository.findBySplitIdAndRefunder(payDue.splitId,user).get(0)
         if(paymentCard.status=="paid") return PaymentToPaymentDTO(paymentCard)
         if(paymentCard.amount<=payDue.amount){
         paymentCard.status = "paid"
@@ -96,9 +100,8 @@ class PaymentServiceImpl : PaymentService {
         return PaymentToPaymentDTO(result)
     }
 
-    override fun expenseDetails(token: String): ExpenseDetails {
-        val email = extractEmailFromToken(token)
-        val user = userRepository.findByEmail(email)!!
+    override fun expenseDetails(username:String): ExpenseDetails {
+        val user = userRepository.findByEmail(username)!!
 
         var paymentList:List<Payment> = paymentRepository.findByRefunder(user).filter { it.status=="paid" }
         val totalAmountPaid = paymentList.sumOf { it.amount.toDouble() }.toFloat()
@@ -113,7 +116,7 @@ class PaymentServiceImpl : PaymentService {
         val totalAmountLeft = paymentList.sumOf { it.amount.toDouble() }.toFloat()
 
         return ExpenseDetails(
-                email=email,
+                email=username,
                 totalAmountPaid = totalAmountPaid,
                 totalAmountDue =  totalAmountDue,
                 totalAmountRecieved = totalAmountRecieved,
@@ -122,10 +125,7 @@ class PaymentServiceImpl : PaymentService {
 
     }
 
-    override fun splitStatus(splitId: String,token:String): SplitStatus {
-
-            var username = extractEmailFromToken(token)
-
+    override fun splitStatus(splitId: String,username:String): SplitStatus {
             val paymentDetails:List<Payment> = paymentRepository.findBySplitId(splitId)
             if(userNotIncludeInSplit(paymentDetails,username,false))
             return SplitStatus(
@@ -137,11 +137,11 @@ class PaymentServiceImpl : PaymentService {
             )
 
 
-        var receiver:UserEmailDTO = UserToUserEmailDTO(paymentDetails.get(0).receiver!!)
-        var amount:Float = paymentDetails.get(0).amount
+        val receiver:UserEmailDTO = UserToUserEmailDTO(paymentDetails.get(0).receiver!!)
+        val amount:Float = paymentDetails.get(0).amount
 
-        var PaidList:List<UserEmailDTO> = paymentDetails.filter { it.status=="paid" }.map { UserToUserEmailDTO(it.refunder!!) }
-        var DueList:List<UserEmailDTO> = paymentDetails.filter { it.status=="unpaid" }.map { UserToUserEmailDTO(it.refunder!!) }
+        val PaidList: List<UserEmailDTO> = paymentDetails.filter { it.status=="paid" }.map { UserToUserEmailDTO(it.refunder!!) }
+        val DueList: List<UserEmailDTO> = paymentDetails.filter { it.status=="unpaid" }.map { UserToUserEmailDTO(it.refunder!!) }
             return SplitStatus(
                 splitId = splitId,
                 receiver = receiver,
@@ -149,6 +149,33 @@ class PaymentServiceImpl : PaymentService {
                 DueList = DueList,
                 amount = amount
             )
+    }
+
+    override fun sendReminder(splitId: String, username:String): String {
+        val user = userRepository.findByEmail(username)
+        val paymentReminderList: List<Payment> = paymentRepository.findBySplitIdAndReceiver(splitId,user!!).filter { it.status=="unpaid" }
+
+        if(paymentReminderList.isEmpty()) return "No Payment Exist"
+
+        val emailNotFound = mutableListOf<String>()
+        for(reminder in paymentReminderList){
+        val subject: String = reminder.splitId + " Due Reminder!!"
+        val message: String = "SPLITID: "+reminder.splitId + " is been due\nAmount: "+reminder.amount+"\nPay To: "+reminder.receiver?.email
+            val emailDetail:EmailDetails = reminder.refunder?.let {
+                EmailDetails(
+                    recipient = it.email,
+                    subject = subject,
+                    msgBody = message
+                )
+            }!!
+            if(!emailServiceImpl.sendSimpleMail(emailDetail)) emailNotFound.add(reminder.refunder?.email!!)
+        }
+
+
+
+        if(emailNotFound.isNotEmpty()) return emailNotFound.joinToString(", ") { " email not found" }
+
+        return "Reminders sent successfully"
     }
 
     fun userNotIncludeInSplit(paymentList:List<Payment>,username:String,needToDelete:Boolean):Boolean{
@@ -165,15 +192,18 @@ class PaymentServiceImpl : PaymentService {
     }
 
 
-    fun deleteTheSplit(splitId: String,token: String):Any{
-        var username = extractEmailFromToken(token)
-
+    fun deleteTheSplit(splitId: String,username:String):Any{
         val paymentDetails:List<Payment> = paymentRepository.findBySplitId(splitId)
         if(userNotIncludeInSplit(paymentDetails,username,true))
             return "You are not the receiver of the split"
 
-        val paymentPaidAlready:List<Payment> = paymentDetails.filter { it.status=="paid" }
+        var paymentPaidAlready:List<Payment> = paymentDetails.filter { it.status=="paid" }
 
+        for(payment in paymentPaidAlready){
+            paymentRepository.deleteById(payment.id)
+        }
+
+        var paymentDueByUser = mutableListOf<Payment>()
         for(payment in paymentPaidAlready){
             payment.splitId = generateSplitId()
             val refunderToReciever = payment.refunder
@@ -181,27 +211,21 @@ class PaymentServiceImpl : PaymentService {
             payment.receiver = refunderToReciever
             payment.status = "unpaid"
             val result = paymentRepository.save(payment)
+            paymentDueByUser.add(result)
         }
 
-        val paymentDue:List<Payment> = paymentDetails.filter { it.status=="unpaid" }
-        for(payment in paymentPaidAlready){
-            paymentRepository.deleteById(payment.id)
+        return if(paymentDueByUser.isEmpty()) "$splitId has been deleted"
+        else paymentDueByUser.map { it ->
+            PaymentDTO(
+                splitId = it.splitId!!,
+                amount = it.amount,
+                refunder = UserToUserEmailDTO(it.refunder!!),
+                receiver = UserToUserEmailDTO(it.receiver!!),
+                troop = TroopToTroopDetailsDTO(it.troop!!),
+                status = it.status!!
+            )
         }
-
-        if(paymentPaidAlready.isEmpty()) return splitId + " has been deleted"
-        else return paymentPaidAlready.map { it ->
-                PaymentDTO(
-                    splitId = it.splitId!!,
-                    amount = it.amount,
-                    refunder = UserToUserEmailDTO(it.refunder!!),
-                    receiver = UserToUserEmailDTO(it.receiver!!),
-                    troop = TroopToTroopDetailsDTO(it.troop!!),
-                    status = it.status!!
-                )
-            }
         }
-
-    private fun extractEmailFromToken(token:String):String = jwtGenerator.generateUserNameByJWT(token.substring(7, token.length))
 
     private fun generateSplitId():String{
         var splitId:String

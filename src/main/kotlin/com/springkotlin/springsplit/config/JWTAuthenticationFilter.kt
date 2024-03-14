@@ -36,6 +36,7 @@ class JWTAuthenticationFilter : OncePerRequestFilter() {
             val authenticationToken = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
             authenticationToken.details = WebAuthenticationDetailsSource().buildDetails(request)
             SecurityContextHolder.getContext().authentication = authenticationToken
+            request.setAttribute("username",username)
         }
         filterChain.doFilter(request, response)
     }
