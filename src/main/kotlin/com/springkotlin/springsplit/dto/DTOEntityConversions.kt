@@ -16,7 +16,7 @@ fun PaymentToPaymentDTO(payment: Payment): PaymentDTO = PaymentDTO(
 fun TroopToTroopDetailsDTO(troop: Troop): TroopDetailsDTO =
     TroopDetailsDTO(
         name = troop.name,
-        userList = troop.users.map{ UserToUserEmailDTO(it) }.toMutableSet(),
+        userList = troop.users.map { UserToUserEmailDTO(it) }.toMutableSet(),
         totalAmountTransacted = troop.totalAmount
     )
 

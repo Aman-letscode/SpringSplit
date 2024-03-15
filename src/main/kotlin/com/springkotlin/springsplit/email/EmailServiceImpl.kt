@@ -9,23 +9,20 @@ import org.springframework.stereotype.Service
 @Service
 class EmailServiceImpl @Autowired constructor(
     private val javaMailSender: JavaMailSender,
-    @Value("\${spring.mail.username}") private val sender: String
+    @Value("\${spring.mail.username}") private val sender: String,
 ) : EmailService {
 
 
-
-    override fun sendSimpleMail(details: EmailDetails):Boolean {
+    override fun sendSimpleMail(details: EmailDetails) {
         try {
             val mailMessage = SimpleMailMessage()
             mailMessage.from = sender
             mailMessage.setTo(details.recipient)
             mailMessage.text = details.msgBody
             mailMessage.subject = details.subject
-
             javaMailSender.send(mailMessage)
-            return true
         } catch (e: Exception) {
-            return false
+            throw e
         }
     }
 }

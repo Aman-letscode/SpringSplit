@@ -6,46 +6,60 @@ import com.springkotlin.springsplit.entities.Roles
 import com.springkotlin.springsplit.entities.User
 import com.springkotlin.springsplit.repositories.RoleRepository
 import com.springkotlin.springsplit.repositories.UserRepository
+import com.springkotlin.springsplit.services.EntityFunctions
 import com.springkotlin.springsplit.services.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import java.nio.file.FileAlreadyExistsException
 
 
 @Service
-class UserServiceImpl :UserService{
+class UserServiceImpl : UserService {
 
-    @Autowired lateinit var userRepository: UserRepository
-    @Autowired lateinit var roleRepository: RoleRepository
-    @Autowired lateinit var passwordEncoder: BCryptPasswordEncoder;
+    @Autowired
+    private lateinit var userRepository: UserRepository
 
-    //For Login
-    @Autowired lateinit var jwtGenerator: JWTGenerator
-//    @Autowired lateinit var modelMapper: ModelMapper
-    override fun login(credentials: LoginDTO): Any {
+    @Autowired
+    private lateinit var roleRepository: RoleRepository
 
+    @Autowired
+    private lateinit var passwordEncoder: BCryptPasswordEncoder;
+
+    @Autowired
+    private lateinit var jwtGenerator: JWTGenerator
+
+    @Autowired
+    private val entityFunctions: EntityFunctions = EntityFunctions()
+
+
+    override fun login(credentials: LoginDTO): AuthTokenDTO {
+
+//        if (!entityFunctions.checkEmail(credentials.email)) throw Exception("Email Format is Incorrect")
         val token = jwtGenerator.generateToken(credentials.email)
-        val foundUser:User = userRepository.findByEmail(credentials.email)?:return NotFoundException()
-        if (passwordEncoder.matches(credentials.password,foundUser.password)) return AuthTokenDTO(token)
-        else return "Invalid Password"
+        val foundUser: User = userRepository.findByEmail(credentials.email) ?: throw NotFoundException()
+        if (!passwordEncoder.matches(
+                credentials.password,
+                foundUser.password
+            )
+        ) throw Exception("Password Doesn't Match")
+        return AuthTokenDTO(token)
     }
 
-    override fun createUser(userDTO: UserDTO):Any {
+    override fun createUser(userDTO: UserDTO): UserDTO {
 
-        val foundUser:User? = userRepository.findByEmail(userDTO.email)
-        if(foundUser!=null) return "User Already Exists"
+//        if (!entityFunctions.checkEmail(userDTO.email)) throw Exception("Email Format is Incorrect")
+        val foundUser: User? = userRepository.findByEmail(userDTO.email)
+        if (foundUser != null) throw FileAlreadyExistsException("User Already Exist")
 
         val role: Roles = roleRepository.findByName(userDTO.role)
-        val encodedPassword:String = passwordEncoder.encode(userDTO.password)
-        val user = User(userDTO.name,userDTO.email,encodedPassword,role)
-        var result:User = userRepository.save(user)
-//        return modelMapper.map(result,UserDTO::class.java)
-        return UserDTO(result.name,result.email,result.password,result.role.name)
+        val encodedPassword: String = passwordEncoder.encode(userDTO.password)
+        val user = User(userDTO.name, userDTO.email, encodedPassword, role)
+        return UserToUserDTO(userRepository.save(user))
     }
-    fun displayAllUser():List<UserDTO> = userRepository.findAll().map { it -> UserToUserDTO(it) }
 
-
+    fun displayAllUser(): List<UserDTO> = userRepository.findAll().map { it -> UserToUserDTO(it) }
 
 
 }

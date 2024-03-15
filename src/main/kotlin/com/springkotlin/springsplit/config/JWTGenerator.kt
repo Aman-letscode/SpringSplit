@@ -14,20 +14,19 @@ import javax.crypto.SecretKey
 @Component
 class JWTGenerator {
 
-    final var securityConstants:SecurityConstants = SecurityConstants()
+    final var securityConstants: SecurityConstants = SecurityConstants()
 
-    val secretKey:SecretKey = Keys.hmacShaKeyFor(securityConstants.JWT_SECRET.toByteArray())
+    val secretKey: SecretKey = Keys.hmacShaKeyFor(securityConstants.JWT_SECRET.toByteArray())
         .also { key ->
             if (key.encoded.size * 8 < 256) {
                 throw WeakKeyException("Key size is not secure enough for HMAC-SHA algorithm.")
             }
         }
 
-    fun generateToken(username: String):String{
-//        val username:String = authentication.name
+    fun generateToken(username: String): String {
         val currentDate: Date = Date()
-        val expiryDate:Date = Date(currentDate.time+securityConstants.JWT_EXPIRATION*1000)
-        val token:String = Jwts.builder()
+        val expiryDate: Date = Date(currentDate.time + securityConstants.JWT_EXPIRATION * 1000)
+        val token: String = Jwts.builder()
             .claims()
             .subject(username)
             .issuedAt(Date())
@@ -35,24 +34,24 @@ class JWTGenerator {
             .and()
             .signWith(secretKey)
             .compact()
-return token
+        return token
     }
 
-    fun isExpired(token:String):Boolean =
+    fun isExpired(token: String): Boolean =
         getAllClaims(token)
             .expiration
             .before(Date(System.currentTimeMillis()))
 
 
-    fun generateUserNameByJWT(token:String):String = getAllClaims(token).subject
+    fun generateUserNameByJWT(token: String): String = getAllClaims(token).subject
 
-    fun validateToken(token:String):Boolean{
-        if(isExpired(token)) return false
+    fun validateToken(token: String): Boolean {
+        if (isExpired(token)) return false
         else return true
     }
 
 
-    private fun getAllClaims(token:String): Claims {
+    private fun getAllClaims(token: String): Claims {
         val parser = Jwts.parser()
             .verifyWith(secretKey)
             .build()

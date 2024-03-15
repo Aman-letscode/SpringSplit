@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 
-interface TroopRepository:JpaRepository<Troop,Int>, JpaSpecificationExecutor<Troop> {
-    fun findByName(name:String):Troop
+interface TroopRepository:JpaRepository<Troop,Int> {
+    fun findByName(name:String):Troop?
 
     fun existsByNameAndUsers(name:String,user:User):Boolean
     fun existsByName(name:String):Boolean
@@ -23,5 +23,4 @@ interface TroopRepository:JpaRepository<Troop,Int>, JpaSpecificationExecutor<Tro
     )
     fun findTroops():List<Array<Any>>
 
-    override fun findAll(spec: Specification<Troop>): List<Troop>
 }

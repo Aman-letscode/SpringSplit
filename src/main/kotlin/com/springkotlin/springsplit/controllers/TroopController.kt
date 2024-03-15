@@ -6,6 +6,7 @@ import com.springkotlin.springsplit.dto.TroopDetailsDTO
 import com.springkotlin.springsplit.dto.UserEmailDTO
 import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.services.implement.TroopServiceImpl
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -16,22 +17,23 @@ import org.springframework.web.bind.annotation.*
 class TroopController(@Autowired var troopServiceImpl: TroopServiceImpl) {
 
     @GetMapping("/createTroop")
-    fun create():String{
-        return "Welcome to creation of Troops"
-    }
+    fun create(): String =
+        "Welcome to creation of Troops"
+
     @GetMapping("/showTroops")
-    fun showTroops():ResponseEntity<Any>   = ResponseEntity.ok(troopServiceImpl.allTroops())
-//
-//    @GetMapping("/showTroops")
-//    fun showTroops():ResponseEntity<Any>   = ResponseEntity.ok(troopServiceImpl.allTroopsBySpec())
+    fun showTroops(): ResponseEntity<List<TroopDetailsDTO>> =
+        ResponseEntity.ok(troopServiceImpl.allTroops())
 
     @PostMapping("/createTroop")
-    fun createTroop(@RequestBody troopData:AddUserDTO,@RequestHeader("Authorization") token: String):String = troopServiceImpl.createTroop(troopData,token)
+    fun createTroop(@RequestBody troopData: AddUserDTO, request: HttpServletRequest): TroopDetailsDTO =
+        troopServiceImpl.createTroop(troopData, request.getAttribute("username") as String)
 
     @PutMapping("/addUsers")
-    fun addUsers(@RequestBody addUser:AddUserDTO,@RequestHeader("Authorization") token: String):String = troopServiceImpl.addUserInTroop(addUser,token)
+    fun addUsers(@RequestBody addUser: AddUserDTO, request: HttpServletRequest): TroopDetailsDTO =
+        troopServiceImpl.addUserInTroop(addUser, request.getAttribute("username") as String)
 
     @GetMapping("/user")
-    fun troopsOfUser(@RequestBody userEmailDTO: UserEmailDTO,@RequestHeader("Authorization") token: String):List<Any>  = troopServiceImpl.allTroopsofUser(userEmailDTO,token)
+    fun troopsOfUser(request: HttpServletRequest): List<TroopDetailsDTO> =
+        troopServiceImpl.allTroopsofUser(request.getAttribute("username") as String)
 
 }

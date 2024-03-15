@@ -13,7 +13,7 @@ import java.util.stream.Collectors
 
 
 @Service
-class CustomUserDetailsService(@Autowired val userRepository: UserRepository): UserDetailsService{
+class CustomUserDetailsService(@Autowired val userRepository: UserRepository) : UserDetailsService {
     override fun loadUserByUsername(username: String): UserDetails {
         val user: User = userRepository.findByEmail(username)!!
         return org.springframework.security.core.userdetails.User(
@@ -22,7 +22,8 @@ class CustomUserDetailsService(@Autowired val userRepository: UserRepository): U
             mapRolesToAuthorities(user.role)
         )
     }
-    private fun mapRolesToAuthorities(roles:Roles): Collection<GrantedAuthority> {
+
+    private fun mapRolesToAuthorities(roles: Roles): Collection<GrantedAuthority> {
         return listOf(SimpleGrantedAuthority(roles.name))
     }
 

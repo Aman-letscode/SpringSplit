@@ -21,7 +21,7 @@ class JWTAuthenticationFilter : OncePerRequestFilter() {
     private lateinit var tokenGenerator: JWTGenerator
 
     @Autowired
-    private lateinit var userServiceImpl:CustomUserDetailsService
+    private lateinit var userServiceImpl: CustomUserDetailsService
 
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(
@@ -36,7 +36,7 @@ class JWTAuthenticationFilter : OncePerRequestFilter() {
             val authenticationToken = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
             authenticationToken.details = WebAuthenticationDetailsSource().buildDetails(request)
             SecurityContextHolder.getContext().authentication = authenticationToken
-            request.setAttribute("username",username)
+            request.setAttribute("username", username)
         }
         filterChain.doFilter(request, response)
     }
