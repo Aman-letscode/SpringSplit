@@ -175,12 +175,12 @@ class PaymentServiceImpl : PaymentService {
         return splitId
     }
 
-    private fun calculateAmount(amount: Float, count: Int): Float {
-        return amount.div(count + 1)
+    private fun calculateAmount(amount: Float, count: Int): Float =
+         amount.div(count + 1)
             .toBigDecimal()
             .setScale(2, RoundingMode.CEILING)
             .toFloat()
-    }
+
 
 
 
