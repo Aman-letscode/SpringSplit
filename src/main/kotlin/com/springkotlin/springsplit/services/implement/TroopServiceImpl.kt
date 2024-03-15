@@ -41,12 +41,12 @@ class TroopServiceImpl
 
     override fun allTroops(): List<TroopDetailsDTO> {
         val result = troopRepository.findTroops()
-        val troopDetailsMap = mutableMapOf<Int, TroopDetailsDTO>()
+        val troopDetailsMap = mutableMapOf<Long, TroopDetailsDTO>()
 
         for (array in result) {
-            val troopId = array[1] as Int
+            val troopId = array[1] as Long
             val troopName = array[3] as String
-            val userId = array[0] as Int
+            val userId = array[0] as Long
             val user = userRepository.findById(userId).get()
             val troopDetails = troopDetailsMap.getOrPut(troopId) {
                 TroopDetailsDTO(name = troopName, userList = mutableSetOf(), totalAmountTransacted = 0F)
@@ -69,14 +69,12 @@ class TroopServiceImpl
         val troop = entityFunctions.findTroopByName(addUserDTO.troopName)
         entityFunctions.validateUsersInTroop(addUserDTO.troopName, user)
 
-
         val troopDetails: TroopDetailsDTO = allTroops().filter { it.name == addUserDTO.troopName }[0]
         var memberUser: List<User> = addUserDTO.emailList.map { entityFunctions.findUserByEmail(it) }
         memberUser = memberUser.filter { UserToUserEmailDTO(it) !in troopDetails.userList }
 
         val updatedMembers: MutableSet<User> = troop.users.plus(memberUser).toMutableSet()
         val updatedTroop: Troop = troop.copy(users = updatedMembers)
-
 
         val savedTroop: Troop = troopRepository.save(updatedTroop)
 

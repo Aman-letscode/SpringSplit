@@ -11,8 +11,8 @@ import java.time.LocalDateTime
 data class Troop(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long,
 
     @UniqueElements
     @Column(name = "name", unique = true)

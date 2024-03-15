@@ -55,4 +55,12 @@ class EntityFunctions {
         return regex.matches(email)
     }
 
+    fun validateUserListAndTroop(userList: MutableSet<User>) {
+        var alreadyATroop = troopRepository.findAll()
+        userList.map {
+            alreadyATroop = alreadyATroop.intersect(troopRepository.findByUsers(it).toSet()).toMutableList()
+        }
+        if(alreadyATroop.size ==1) throw Exception("Troop already Present")
+    }
+
 }

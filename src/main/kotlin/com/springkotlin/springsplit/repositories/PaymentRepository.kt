@@ -5,7 +5,7 @@ import com.springkotlin.springsplit.entities.Troop
 import com.springkotlin.springsplit.entities.User
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface PaymentRepository:JpaRepository<Payment,Int> {
+interface PaymentRepository:JpaRepository<Payment,Long> {
     fun findByRefunder(refunder: User):List<Payment>
     fun findByReceiver(receiver:User):List<Payment>
     fun findByTroop(troop: Troop):List<Payment>

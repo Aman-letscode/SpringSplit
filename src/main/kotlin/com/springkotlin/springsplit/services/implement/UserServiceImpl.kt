@@ -36,7 +36,6 @@ class UserServiceImpl : UserService {
 
     override fun login(credentials: LoginDTO): AuthTokenDTO {
 
-//        if (!entityFunctions.checkEmail(credentials.email)) throw Exception("Email Format is Incorrect")
         val token = jwtGenerator.generateToken(credentials.email)
         val foundUser: User = userRepository.findByEmail(credentials.email) ?: throw NotFoundException()
         if (!passwordEncoder.matches(
@@ -49,13 +48,13 @@ class UserServiceImpl : UserService {
 
     override fun createUser(userDTO: UserDTO): UserDTO {
 
-//        if (!entityFunctions.checkEmail(userDTO.email)) throw Exception("Email Format is Incorrect")
         val foundUser: User? = userRepository.findByEmail(userDTO.email)
         if (foundUser != null) throw FileAlreadyExistsException("User Already Exist")
 
         val role: Roles = roleRepository.findByName(userDTO.role)
         val encodedPassword: String = passwordEncoder.encode(userDTO.password)
         val user = User(userDTO.name, userDTO.email, encodedPassword, role)
+
         return UserToUserDTO(userRepository.save(user))
     }
 

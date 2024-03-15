@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 
-interface TroopRepository:JpaRepository<Troop,Int> {
+interface TroopRepository:JpaRepository<Troop,Long> {
     fun findByName(name:String):Troop?
 
     fun existsByNameAndUsers(name:String,user:User):Boolean

@@ -111,7 +111,7 @@ class PaymentServiceImpl : PaymentService {
             throw Exception("User Not Part Of the split")
 
         val receiver: UserEmailDTO = UserToUserEmailDTO(paymentDetails.first().receiver!!)
-        val amount: Float = paymentDetails.first().amount
+        val amount: Float = paymentDetails.sumOf { it.amount.toDouble() }.toFloat()
 
         val paidList: List<UserEmailDTO> =
             paymentDetails.filter { it.status == "paid" }
@@ -149,12 +149,10 @@ class PaymentServiceImpl : PaymentService {
         val paymentList = paymentRepository.findBySplitId(splitId)
         if (userNotIncludeInSplit(paymentList, username, true))
             throw Exception("You are not the receiver of the split")
-
         paymentList.filter { it.status == "paid" }
             .forEach {
                 paymentRepository.deleteById(it.id)
             }
-
         val paymentDueByUser = paymentList
             .filter { it.status == "paid" }
             .map { it ->

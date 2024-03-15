@@ -13,9 +13,8 @@ data class Payment(
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int,
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long,
 
     @Column(name = "splitId", nullable = true)
     var splitId: String?,
@@ -23,12 +22,10 @@ data class Payment(
     @Column(name = "amount")
     var amount: Float,
 
-
     @Nullable
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     @JoinColumn(name = "refunderId")
     var refunder: User?,
-
 
     @Nullable
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
@@ -42,7 +39,6 @@ data class Payment(
 
     @Column(name = "status")
     var status: String?,
-
 
     @CreationTimestamp
     @Column(updatable = false)

@@ -7,8 +7,8 @@ import jakarta.persistence.*
 data class Roles(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long,
 
     @Column(name = "name")
     val name: String,

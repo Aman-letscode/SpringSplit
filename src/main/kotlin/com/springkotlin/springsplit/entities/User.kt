@@ -13,8 +13,8 @@ import kotlin.jvm.Transient
 data class User(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long,
 
     @Column(name = "name")
     var name: String,
