@@ -42,11 +42,10 @@ class TroopServiceImpl
     override fun allTroops(): List<TroopDetailsDTO> {
         val result = troopRepository.findTroops()
         val troopDetailsMap = mutableMapOf<Long, TroopDetailsDTO>()
-
         for (array in result) {
+            val userId = array[0] as Long
             val troopId = array[1] as Long
             val troopName = array[3] as String
-            val userId = array[0] as Long
             val user = userRepository.findById(userId).get()
             val troopDetails = troopDetailsMap.getOrPut(troopId) {
                 TroopDetailsDTO(name = troopName, userList = mutableSetOf(), totalAmountTransacted = 0F)

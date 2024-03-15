@@ -61,4 +61,9 @@ class PaymentController(@Autowired var paymentServiceImpl: PaymentServiceImpl) {
         ResponseEntity.ok(paymentServiceImpl.deleteTheSplit(splitId, request.getAttribute("username") as String))
 
 
+//    @GetMapping("/fruits")
+//    fun returnFruits():List<String> = paymentServiceImpl.getList()
+
+
+
 }

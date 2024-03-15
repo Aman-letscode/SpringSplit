@@ -182,11 +182,20 @@ class PaymentServiceImpl : PaymentService {
             .toFloat()
     }
 
+
+
     private fun userNotIncludeInSplit(paymentList: List<Payment>, username: String, needToDelete: Boolean): Boolean =
-         when (needToDelete) {
+        when (needToDelete) {
             true -> paymentList.filter { it.receiver!!.email.contains(username) }
             false -> paymentList.filter { it.receiver!!.email.contains(username) || it.refunder!!.email.contains(username) }
         }.isEmpty()
 
+//private fun userNotIncludeInSplit(splitId: String, username: String, needToDelete:Boolean):Boolean =
+//    when (needToDelete){
+//        true -> paymentRepository.findBySplitId(splitId).first().receiver?.equals(entityFunctions.findUserByEmail(username))!!
+//        false -> (paymentRepository.findBySplitId(splitId).first().receiver?.equals(entityFunctions.findUserByEmail(username))!! || paymentRepository.findBySplitId(splitId).first().refunder?.equals(entityFunctions.findUserByEmail(username))!!)
+//    }
 
+
+//    fun getList():List<String> = listOf("banana","apple").filterNot {it.contains("n")}
 }
