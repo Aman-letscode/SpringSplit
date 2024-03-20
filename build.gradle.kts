@@ -30,13 +30,17 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
 	implementation("io.jsonwebtoken:jjwt-impl:0.12.5")
 	implementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
-
 	implementation("org.springframework.boot:spring-boot-starter-mail:3.2.3")
-
 	implementation("javax.persistence:javax.persistence-api:2.2")
 	runtimeOnly("com.mysql:mysql-connector-j")
-//	runtimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.0")
+// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client
+	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:4.1.0")
+// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+	testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+
 }
 
 tasks.withType<KotlinCompile> {
